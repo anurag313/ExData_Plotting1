@@ -11,8 +11,8 @@ xaxisdata=seq(from = as.POSIXct("2007-02-01 00:00:00"),
               to = as.POSIXct("2007-02-02 23:59:59"), by="min")
 #plot(x=xaxisdata, y=yaxisdata, xlab= "", 
  #    ylab= "Energy sub metering", type ="l")
-with (subdata,plot(x=xaxisdata, xlab ="", ylab= "Energy sub metering", type = "n"))
-lines(x=xaxisdata,y= subdata$Sub_metering_1,type="l")
+plot(x=xaxisdata, y= subdata$Sub_metering_1,
+     xlab ="", ylab= "Energy sub metering", type = "l")
 lines(x=xaxisdata,y=subdata$Sub_metering_2,type="l", col = "red")
 lines(x=xaxisdata,y=subdata$Sub_metering_3,type="l",col = "blue")
 legend("topright",lty= 1, col=c("black", "red", "blue"),
