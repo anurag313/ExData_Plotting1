@@ -1,34 +1,52 @@
-mydata <- read.table("household_power_consumption.txt", sep=";",
-                     header=T,stringsAsFactor=F, na.strings="?")
 
-mydata$DateTime <- strptime(paste(mydata$Date, mydata$Time),
-                            format="%d/%m/%Y %H:%M:%S")
+mydata <- read.table("./household_power_consumption.txt", header=TRUE, sep=";"
+                     , na.strings = "?", nrows= 2075259, stringsAsFactors=FALSE)
 
-subdata <- subset(mydata, Date == "1/2/2007" | Date == "2/2/2007")
-yaxisdata <- as.numeric(subdata$Global_active_power)
-xaxisdata=seq(from = as.POSIXct("2007-02-01 00:00:00"), 
-              to = as.POSIXct("2007-02-02 23:59:59"), by="min")
-plot(x=xaxisdata, y=yaxisdata, xlab= "", 
-     ylab= "Global Active Power (Kilowatts)", type ="l")
+mydata$Date <- as.Date(mydata$Date, "%d/%m/%Y")
+
+
+selectiondata <- mydata[mydata$Date=="2007-02-01" | mydata$Date=="2007-02-02",
+                        c(1:9)]
+
+selectiondata$datetime <- paste(selectiondata$Date, selectiondata$Time)
+selectiondata$datetime <- strptime(selectiondata$datetime, "%Y-%m-%d %H:%M:%S")
+
+# Read the subsets to be plotted.
+gapower <- selectiondata$Global_active_power
+sm1 <- selectiondata$Sub_metering_1
+sm2 <- selectiondata$Sub_metering_2
+sm3 <- selectiondata$Sub_metering_3
+
+
+png(filename="plot4.png", width=480, height=480, units="px", pointsize=12, 
+    bg="white", res=NA)
 
 par(mfrow=c(2,2))
-with(subdata,{
-  plot(x=xaxisdata, y=yaxisdata, xlab= "", 
-       ylab= "Global Active Power", type ="l")
-  
-  plot(x= mydata$DateTime, y=mydata$Voltage, xlab="datetime",
-       ylab="Voltage",type="l")
-  
-  plot(x=xaxisdata, y= subdata$Sub_metering_1,
-       xlab ="", ylab= "Energy sub metering", type = "l")
-  lines(x=xaxisdata,y=subdata$Sub_metering_2,type="l", col = "red")
-  lines(x=xaxisdata,y=subdata$Sub_metering_3,type="l",col = "blue")
-  legend("topright",lty= 1, col=c("black", "red", "blue"),
-         legend= c("Sub_metering_1","Sub_metering_2","Sub_metering_3"))
-  
- plot(x= mydata$DateTime, y=mydata$Global_reactive_power, xlab="datetime",
-       ylab="Global_reactive_power",type="l")
-  
-  
-}
-  )
+
+# Plot1
+plot(x=selectiondata$datetime, y=gapower, xlab="", cex.lab=0.7,
+     ylab="Global Active Power (kilowatts)", type="l")
+
+# Plot2
+plot(x=selectiondata$datetime, y=selectiondata$Voltage, cex.lab=0.7,
+     xlab="datetime", ylab="Voltage", type="l")
+
+# Plot3
+plot3 <- plot(x=selectiondata$datetime, sm1, col="black", type="l",
+              cex.lab=0.7, ylim=range(sm1), ylab= "Energy sub metering", xlab="")
+par(new=TRUE)
+
+plot3 <- plot(x=selectiondata$datetime, sm2, col="red", xaxt="n", yaxt="n",
+              type="l", cex.lab=0.7, ylim=range(sm1), ylab= "Energy sub metering", xlab="")
+par(new=TRUE)
+plot3 <- plot(x=selectiondata$datetime, sm3, col="blue", xaxt="n", yaxt="n", 
+              type="l", cex.lab=0.7, ylim=range(sm1), ylab= "Energy sub metering", xlab="")
+legend("topright", c("Sub_metering_1", "Sub_metering_2", "Sub_metering_3"), 
+       lty=c(1,1), lwd=c(2.5,2.5),col=c("black","red", "blue"), cex=0.5)
+
+# Plot4
+plot(x=selectiondata$datetime, y=selectiondata$Global_reactive_power, cex.lab=0.7,
+     xlab="datetime", ylab="Global_reactive_power", type="l")
+
+# Turn graphics device off
+dev.off()
